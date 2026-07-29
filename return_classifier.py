@@ -13,6 +13,7 @@ def main():
     end_date = input("Enter end date (YYYY-MM-DD): ")
 
     data = load_and_clean_data(stock, start_date, end_date)
+    X_train, X_test, y_train, y_test = split_features_and_labels(data, feature_cols = FEATURE_COLUMNS, label_col = 'Label', test_size = 0.2)
 
 
 def load_and_clean_data(stock, start_date, end_date):
@@ -43,6 +44,16 @@ def load_and_clean_data(stock, start_date, end_date):
     data['Label'] = data['Label'].astype(int)
 
     return data
+
+#define the feature columns for the split
+FEATURE_COLUMNS = ['Daily Return', '5 Day Return', '10 Day Return', 'Volatility', 'Signal']
+def split_features_and_labels(data, feature_cols = FEATURE_COLUMNS, label_col = 'Label', test_size = 0.2):
+    X = data[feature_cols]
+    y = data[label_col]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = test_size, shuffle = False)
+
+    return X_train, X_test, y_train, y_test
 
 if __name__ == "__main__":
     main()
