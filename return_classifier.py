@@ -22,7 +22,9 @@ def main():
 
     model, y_pred, y_probability, accuracy = logistic_regression(X_train, X_test, y_train, y_test)
 
-    rf_model, rf_y_pred, rf_y_probability, rf_accuracy, rf_importances = random_forest(X_train, X_test, y_train, y_test)
+    rf_model, rf_y_pred, rf_y_probability, rf_accuracy, importances = random_forest(X_train, X_test, y_train, y_test)
+
+    plot_results(naive_accuracy, accuracy, rf_accuracy, y_test, importances)
 
 def fetch_price_data(stock, start_date, end_date):
     #network I/O -- not unit tested directly, only exercised by a real run
@@ -148,6 +150,32 @@ def random_forest(X_train, X_test, y_train, y_test, max_depth = 5):
     print(importances)
 
     return model, y_pred, y_probability, accuracy, importances
+
+def plot_results(naive_accuracy, accuracy, rf_accuracy, y_test, importances):
+    n = len(y_test)
+
+    fig, axes = plt.subplots(1, 2, figsize = (12, 5))
+
+    #panel 1 w/ accuracy comparison
+    models = ['Naive\nBaseline', 'Logistic\nRegression', 'Random\nForest']
+    accuracies = [naive_accuracy, accuracy, rf_accuracy]
+    errors = [np.sqrt(a * (1 - a) / n) for a in accuracies]
+
+    axes[0].bar(models, accuracies, yerr=errors, capsize=8, color=['gray', 'steelblue', 'darkorange'])
+    axes[0].axhline(0.5, color='red', linestyle='--', linewidth=1, label='Coin flip (50%)')
+    axes[0].set_ylabel('Accuracy')
+    axes[0].set_title('Model comparison (error bars = 1 standard error)')
+    axes[0].legend()
+    axes[0].set_ylim(0, max(accuracies) + max(errors) + 0.1)
+
+    #panel 2 w/ feature importances
+    axes[1].barh(importances.index[::-1], importances.values[::-1], color='seagreen')
+    axes[1].set_title('Random Forest Feature Importances')
+    axes[1].set_xlabel('Importance')
+
+    plt.tight_layout()
+    plt.savefig('classifier_results.png', dpi=150)
+    plt.show()
 
 if __name__ == "__main__":
     main()
